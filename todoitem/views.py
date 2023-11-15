@@ -62,10 +62,18 @@ class TodoitemView(APIView):
         else:
             return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, id_arg):
+        todoitem = single(id_arg=id_arg)
+        if todoitem is None:
+            return Response({'msg': f'Item com id #{id_arg} não encontrado'}, status.HTTP_404_NOT_FOUND)
+
+        todoitem.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class TodoitemsView(APIView):
     def get(self, request):
-        queryset = Todoitem.objects.all().order_by('created_at')
+        queryset = Todoitem.objects.all().order_by('updated_at').reverse()
         serializer = TodoitemSerializer(queryset, many=True)
         return Response(serializer.data)
 
