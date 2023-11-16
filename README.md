@@ -22,6 +22,11 @@ Run migrations
 ```bash
 python manage.py migrate
 ```
+Create a superuser
+
+```bash
+python3 manage.py createsuperuser
+```
 
 Run the server
 
