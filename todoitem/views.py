@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer
@@ -18,6 +20,13 @@ def single(id_arg):
         return None
 
 
+@swagger_auto_schema(method='POST', request_body=openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'title': openapi.Schema(type=openapi.TYPE_STRING),
+        'description': openapi.Schema(type=openapi.TYPE_STRING),
+    }
+))
 @api_view(('POST',))
 @renderer_classes((JSONRenderer,))
 def create(request):
@@ -54,6 +63,13 @@ def find_all(request):
     return Response(serializer.data)
 
 
+@swagger_auto_schema(method='PUT', request_body=openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'title': openapi.Schema(type=openapi.TYPE_STRING),
+        'description': openapi.Schema(type=openapi.TYPE_STRING),
+    }
+))
 @api_view(('PUT',))
 @renderer_classes((JSONRenderer,))
 def update(request, id_arg):
