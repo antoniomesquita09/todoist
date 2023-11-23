@@ -56,11 +56,62 @@ def find_by_id(request, id_arg):
         return Response({'msg': f'Item com id #{id_arg} não encontrado'}, status.HTTP_404_NOT_FOUND)
 
 
+page_param = openapi.Parameter(
+    'page', openapi.IN_QUERY,
+    description="current page for pagination",
+    type=openapi.TYPE_INTEGER
+)
+total_items_param = openapi.Parameter(
+    'total_items', openapi.IN_QUERY,
+    description="total items for pagination",
+    type=openapi.TYPE_INTEGER
+)
+order_by_param = openapi.Parameter(
+    'order_by', openapi.IN_QUERY,
+    description="order for pagination",
+    type=openapi.TYPE_STRING
+)
+filter_by_done_param = openapi.Parameter(
+    'filter_by_done', openapi.IN_QUERY,
+    description="filter by done items",
+    type=openapi.TYPE_BOOLEAN
+)
+
+
+@swagger_auto_schema(method='GET', manual_parameters=[
+    page_param,
+    total_items_param,
+    order_by_param,
+    filter_by_done_param
+])
 @api_view(('GET',))
 def find_all(request):
-    queryset = Todoitem.objects.all().order_by('updated_at').reverse()
+    page = request.GET.get('page', 1)
+    total_items = request.GET.get('total_items', 10)
+    order_by = request.GET.get('order_by', 'updated_at')
+    filter_by_done = request.GET.get('filter_by_done', None)
+
+    page = int(page)
+    total_items = int(total_items)
+
+    offset = total_items * (page - 1)
+    limit = total_items * page
+
+    queryset = Todoitem.objects.all().order_by(order_by).reverse()[offset:limit]
     serializer = TodoitemSerializer(queryset, many=True)
     return Response(serializer.data)
+
+    # if filter_by_done is not None:
+    #     filter_by_done_value = True if filter_by_done == 'true' else False
+    #     queryset = Todoitem.objects.all().filter().values().order_by(order_by).reverse()[
+    #                offset:limit]
+    #     serializer = TodoitemSerializer(queryset, many=True)
+    #     return Response(serializer.data)
+    # else:
+    #     queryset = Todoitem.objects.all().order_by(order_by).reverse()[offset:limit]
+    #     serializer = TodoitemSerializer(queryset, many=True)
+    #     return Response(serializer.data)
+
 
 
 @swagger_auto_schema(method='PUT', request_body=openapi.Schema(
