@@ -20,13 +20,16 @@ def single(id_arg):
         return None
 
 
-@swagger_auto_schema(method='POST', request_body=openapi.Schema(
+common_request_body = openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
         'title': openapi.Schema(type=openapi.TYPE_STRING),
         'description': openapi.Schema(type=openapi.TYPE_STRING),
+        'done': openapi.Schema(type=openapi.TYPE_BOOLEAN),
     }
-))
+)
+
+@swagger_auto_schema(method='POST', request_body=common_request_body)
 @api_view(('POST',))
 @renderer_classes((JSONRenderer,))
 def create(request):
@@ -97,30 +100,19 @@ def find_all(request):
     offset = total_items * (page - 1)
     limit = total_items * page
 
-    queryset = Todoitem.objects.all().order_by(order_by).reverse()[offset:limit]
+    queryset = Todoitem.objects.all()
+
+    if filter_by_done is not None:
+        filter_by_done_value = True if filter_by_done == 'true' else False
+        print(filter_by_done_value)
+        queryset = queryset.filter(done__exact=filter_by_done_value)
+
+    queryset = queryset.order_by(order_by).reverse()[offset:limit]
     serializer = TodoitemSerializer(queryset, many=True)
     return Response(serializer.data)
 
-    # if filter_by_done is not None:
-    #     filter_by_done_value = True if filter_by_done == 'true' else False
-    #     queryset = Todoitem.objects.all().filter().values().order_by(order_by).reverse()[
-    #                offset:limit]
-    #     serializer = TodoitemSerializer(queryset, many=True)
-    #     return Response(serializer.data)
-    # else:
-    #     queryset = Todoitem.objects.all().order_by(order_by).reverse()[offset:limit]
-    #     serializer = TodoitemSerializer(queryset, many=True)
-    #     return Response(serializer.data)
 
-
-
-@swagger_auto_schema(method='PUT', request_body=openapi.Schema(
-    type=openapi.TYPE_OBJECT,
-    properties={
-        'title': openapi.Schema(type=openapi.TYPE_STRING),
-        'description': openapi.Schema(type=openapi.TYPE_STRING),
-    }
-))
+@swagger_auto_schema(method='PUT', request_body=common_request_body)
 @api_view(('PUT',))
 @renderer_classes((JSONRenderer,))
 def update(request, id_arg):
