@@ -48,10 +48,10 @@ You can see the **swagger** documentation on [http://localhost:8000/docs](http:/
 
 ### Running with docker
 
-Build the docker image from a deployed docker tag from **DockerHub**
+Pull the docker image from a deployed docker tag on **DockerHub**
 
 ```bash
-docker build -t antoniomesquita09/todoist-backend .
+docker image pull antoniomesquita09/todoist-backend
 ```
 
 Run the deployed image locally
